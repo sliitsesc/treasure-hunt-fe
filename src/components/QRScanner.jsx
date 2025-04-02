@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { useDevices } from "@yudiel/react-qr-scanner";
-import { Camera, CameraIcon } from "lucide-react";
+import { Camera } from "lucide-react";
 import PropTypes from "prop-types";
 
 const QRScanner = ({ handleQRSubmit }) => {
@@ -11,7 +11,7 @@ const QRScanner = ({ handleQRSubmit }) => {
 
   const handleScan = (result) => {
     console.log(result[0].rawValue);
-    handleQRSubmit(Number(result[0].rawValue));
+    handleQRSubmit(result[0].rawValue);
   };
 
   const switchCamera = () => {

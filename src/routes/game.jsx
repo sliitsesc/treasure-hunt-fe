@@ -17,62 +17,62 @@ const GamePage = () => {
   });
   const [isError, setIsError] = useState(false);
   const [clue, setClue] = useState("");
-  const [invalidClue, setInvalidClue] = useState(false);
+  const [invalidClue, setInvalidClue] = useState(true);
   const [place, setPlace] = useState("");
   const { user, isLoaded } = useUser();
 
   // 1. initial fetch to get the first clue (QR code)
-  useEffect(() => {
-    if (isLoaded) {
-      console.log(user.primaryEmailAddress.emailAddress);
-      setNextOperation("waiting");
-      fetch(`${API_URL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          operation: "init",
-          user_id: user.primaryEmailAddress.emailAddress,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("response: ", data);
-          if (data.completed === true) {
-            setNextOperation("completed");
-          } else if (
-            data.state === false &&
-            data.data === "All locations hav  e already been scanned." &&
-            data.operation === "error"
-          ) {
-            setNextOperation("completed");
-            console.log("completed");
-          } else if (data.operation === "qr" || data.operation === "question") {
-            setClue(data.data);
-            setNextOperation(data.operation);
-          }
-        })
-        .catch((error) => {
-          setIsError(true);
-          console.error("Error:", error);
-        });
-    }
-  }, [isLoaded, user]); // Dependency array includes isLoaded and user to ensure correct behavior
+  // useEffect(() => {
+  //   if (isLoaded) {
+  //     console.log(user.primaryEmailAddress.emailAddress);
+  //     setNextOperation("waiting");
+  //     fetch(`${API_URL}`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         operation: "init",
+  //         user_id: user.primaryEmailAddress.emailAddress,
+  //       }),
+  //     })
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         console.log("response: ", data);
+  //         if (data.completed === true) {
+  //           setNextOperation("completed");
+  //         } else if (
+  //           data.state === false &&
+  //           data.data === "All locations hav  e already been scanned." &&
+  //           data.operation === "error"
+  //         ) {
+  //           setNextOperation("completed");
+  //           console.log("completed");
+  //         } else if (data.operation === "qr" || data.operation === "question") {
+  //           setClue(data.data);
+  //           setNextOperation(data.operation);
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         setIsError(true);
+  //         console.error("Error:", error);
+  //       });
+  //   }
+  // }, [isLoaded, user]); // Dependency array includes isLoaded and user to ensure correct behavior
 
   // handle submit QR clue
   // once the code is sent, it returns a question with question id
   function handleQRClueSubmit(code) {
-    fetch(`${API_URL}`, {
+    console.log("Received qr code: ", code); // Debugging
+
+    fetch(`${API_URL}/users/scan`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        operation: "qr",
-        code: code,
-        answer: "",
-        user_id: user.primaryEmailAddress.emailAddress,
+        scannedQRId: code,
+        id: "EEjKkbTfW6pWc40AUlmZ",
       }),
     })
       .then((response) => response.json())
@@ -122,7 +122,7 @@ const GamePage = () => {
       )} */}
       {!isError && (
         <main className="h-full">
-          {nextOperation === "waiting" && (
+          {/* {nextOperation === "waiting" && (
             <div className="text-center text-xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
               Waiting for server 🧐
               <RefreshCw
@@ -131,7 +131,7 @@ const GamePage = () => {
                 className="animate-spin mt-10"
               />
             </div>
-          )}
+          )} */}
 
           {/* wrong clue */}
           {invalidClue && (
@@ -155,7 +155,7 @@ const GamePage = () => {
             </div>
           )}
 
-          {!invalidClue && nextOperation === "question" && (
+          {/* {!invalidClue && nextOperation === "question" && (
             <Question
               questionID={questionID}
               question={question}
@@ -164,7 +164,7 @@ const GamePage = () => {
               onGameComplete={setGameComplete}
               userEmail={user.primaryEmailAddress.emailAddress}
             />
-          )}
+          )} */}
 
           {!invalidClue && nextOperation === "qr" && (
             <div className="flex flex-col items-center justify-center text-center">
@@ -200,7 +200,7 @@ const GamePage = () => {
           )}
         </main>
       )}
-      <ScannerComponent clue={clue} handleQRSubmit={handleQRClueSubmit} />
+      {/* <ScannerComponent clue={clue} handleQRSubmit={handleQRClueSubmit} /> */}
     </>
   );
 };
