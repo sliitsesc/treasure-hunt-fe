@@ -148,7 +148,8 @@ const GamePage = () => {
                   setInvalidClue(false);
                   setNextOperation("qr");
                 }}
-                className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
+                className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
+              >
                 Try again <RotateCcw size={24} className="inline-block ml-2" />
               </button>
             </div>

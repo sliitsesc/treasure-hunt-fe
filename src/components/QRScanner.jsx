@@ -1,49 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { useDevices } from "@yudiel/react-qr-scanner";
-
+import { Camera, CameraIcon } from "lucide-react";
 import PropTypes from "prop-types";
 
 const QRScanner = ({ handleQRSubmit }) => {
-  // Rest of the code
-
-  QRScanner.propTypes = {
-    handleQRSubmit: PropTypes.func.isRequired,
-  };
-
-  const [deviceId, setDeviceId] = useState(undefined);
-  const devices = useDevices();
+  const devices = useDevices(); // Get available cameras
+  const [deviceIndex, setDeviceIndex] = useState(0);
+  const currentDevice = devices[deviceIndex]; // Get the selected device
 
   const handleScan = (result) => {
-    console.log(result[0].rawValue); // Optional: Log the scanned result
-    handleQRSubmit(Number(result[0].rawValue)); // Call the parent component's function with the result as a number
+    console.log(result[0].rawValue);
+    handleQRSubmit(Number(result[0].rawValue));
   };
+
+  const switchCamera = () => {
+    if (devices.length > 1) {
+      setDeviceIndex((prevIndex) => (prevIndex + 1) % devices.length);
+    }
+  };
+
+  // Log the current camera name whenever the deviceIndex changes
+  useEffect(() => {
+    if (currentDevice) {
+      console.log("Current Camera: " + currentDevice.label);
+    }
+  }, [currentDevice]);
 
   return (
     <div className="flex flex-col justify-center items-center archivo-light text-brown-primary text-center">
-      {/* <h2 className="archivo-bold text-brown-primary text-2xl mb-6">{clue}</h2> */}
-      <p className="mb-8">
+      <p className="mb-4 bokor text-2xl">
         Find the location and scan the <br />
         QR code to get the next clue 👀
       </p>
-      <div className="mb-8">
-        <select onChange={(e) => setDeviceId(e.target.value)}>
-          <option value={undefined}>Select camera</option>
-          {devices.map((device, index) => (
-            <option key={index} value={device.deviceId}>
-              {device.label}
-            </option>
-          ))}
-        </select>
-      </div>
+
+      {/* Camera Switch Button */}
+      <button
+        onClick={switchCamera}
+        disabled={devices.length <= 1}
+        className={`flex items-center gap-2 bg-brown-primary text-white px-4 py-2 rounded-lg mb-4 bokor text-2xl ${
+          devices.length <= 1 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        <Camera size={20} />
+        Switch Camera
+      </button>
+
+      {/* Scanner */}
       <Scanner
         paused={false}
-        onScan={handleScan} // Call the handleScan function when a QR code is scanned
-        constraints={{ deviceId: deviceId }}
+        onScan={handleScan}
+        constraints={{ deviceId: currentDevice }}
         styles={{ borderRadius: "50px" }}
       />
     </div>
   );
+};
+
+QRScanner.propTypes = {
+  handleQRSubmit: PropTypes.func.isRequired,
 };
 
 export default QRScanner;
