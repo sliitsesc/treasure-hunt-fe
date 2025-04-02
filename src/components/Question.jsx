@@ -93,7 +93,8 @@ const Question = ({
             />
             <button
               onClick={handleSubmit}
-              className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
+              className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
+            >
               Submit <ArrowRight size={24} className="inline-block ml-2" />
             </button>
           </div>
@@ -111,7 +112,8 @@ const Question = ({
           </div>
           <button
             onClick={handleNextQuestion} // Call handleNextQuestion to reset the component
-            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
+            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
+          >
             Next Question <ArrowRight size={24} className="inline-block ml-2" />
           </button>
         </div>
@@ -128,7 +130,8 @@ const Question = ({
           </div>
           <button
             onClick={() => setState("unanswered")} // Reset component when trying again
-            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
+            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
+          >
             Try again <RotateCcw size={24} className="inline-block ml-2" />
           </button>
         </div>
@@ -157,7 +160,8 @@ const Question = ({
           </div>
           <button
             onClick={handleNextQuestion} // Reset component on error retry
-            className="inline-flex justify-center items=center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w=[200px] text-center mt-10">
+            className="inline-flex justify-center items=center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w=[200px] text-center mt-10"
+          >
             Try again <RotateCcw size={24} className="inline-block ml-2" />
           </button>
         </div>

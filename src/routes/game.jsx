@@ -4,10 +4,13 @@ import { API_URL } from "../constants";
 
 import { useUser } from "@clerk/clerk-react";
 import ScannerComponent from "../components/QRScanner";
-import { RefreshCw, RotateCcw } from "lucide-react";
+import { RefreshCw, RotateCcw, ArrowLeftSquare } from "lucide-react";
+import LostPirate from "../assets/lost_pirate.png";
+import WinnerPirate from "../assets/winner.png";
+import Chest from "../assets/Chest2.png";
 
 const GamePage = () => {
-  const [nextOperation, setNextOperation] = useState("waiting"); // 'waiting', 'scan', 'question', 'clue', 'error', "completed"
+  const [nextOperation, setNextOperation] = useState("qr"); // 'waiting', 'scan', 'question', 'clue', 'error', "completed"
   const [question, setQuestion] = useState("");
   const [questionID, setQuestionID] = useState(null);
   const [nextQuestionData, setNextQuestionData] = useState({
@@ -17,10 +20,10 @@ const GamePage = () => {
   });
   const [isError, setIsError] = useState(false);
   const [clue, setClue] = useState("");
-  const [invalidClue, setInvalidClue] = useState(true);
+  const [invalidClue, setInvalidClue] = useState(false);
   const [place, setPlace] = useState("");
   const { user, isLoaded } = useUser();
-
+  const [showScanner, setShowScanner] = useState(false);
   // 1. initial fetch to get the first clue (QR code)
   // useEffect(() => {
   //   if (isLoaded) {
@@ -115,84 +118,94 @@ const GamePage = () => {
 
   return (
     <>
-      {/* {isError && (
-        <div className="text-center text-3xl bokor text-brown-primary h-full flex justify-center items-center">
-          Error connecting to server 😢
+      {isError && (
+        <div className="text-center text-4xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
+          Error Connecting to Server
+          <img src={LostPirate} className="w-[280px]" />
         </div>
-      )} */}
+      )}
       {!isError && (
         <main className="h-full">
-          {/* {nextOperation === "waiting" && (
-            <div className="text-center text-xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
-              Waiting for server 🧐
+          {nextOperation === "waiting" && (
+            <div className="text-center text-4xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
+              Waiting for server
               <RefreshCw
                 color="brown"
                 size={60}
                 className="animate-spin mt-10"
               />
+              {/* <img src={LostPirate} className="w-[280px]" /> */}
             </div>
-          )} */}
+          )}
 
           {/* wrong clue */}
           {invalidClue && (
             <div className="text-center text-xl archivo-light text-brown-primary h-full flex flex-col justify-center items-center">
-              <p className="text-2xl archivo-bold">
-                Oops!
+              <p className="text-3xl bokor">
+                Arrr!
                 <br />
-                That wasn&apos;t the right clue
+                That was the wrong clue mate!
               </p>
-              <span className="text-[64px] mt-16 mb-10">🫣</span>
+              <img src={LostPirate} className="w-[280px]" />
 
               <button
                 onClick={() => {
                   setInvalidClue(false);
                   setNextOperation("qr");
                 }}
-                className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
+                className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
               >
                 Try again <RotateCcw size={24} className="inline-block ml-2" />
               </button>
             </div>
           )}
 
-          {/* {!invalidClue && nextOperation === "question" && (
-            <Question
-              questionID={questionID}
-              question={question}
-              nextQuestion={handleNextQuestion}
-              setNextQuestionData={setNextQuestion}
-              onGameComplete={setGameComplete}
-              userEmail={user.primaryEmailAddress.emailAddress}
-            />
-          )} */}
-
           {!invalidClue && nextOperation === "qr" && (
             <div className="flex flex-col items-center justify-center text-center">
-              <h2 className="text-2xl archivo-bold text-brown-primary mb-10 mt-10 px-10">
-                {clue}
-              </h2>
-              <ScannerComponent
-                clue={clue}
-                handleQRSubmit={handleQRClueSubmit}
-              />
+              {showScanner ? (
+                // Show ScannerComponent and Back button
+                <>
+                  <ScannerComponent
+                    clue={clue}
+                    handleQRSubmit={handleQRClueSubmit}
+                  />
+                  <button
+                    onClick={() => setShowScanner(false)}
+                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl pl-6 pr-8 py-4 rounded-lg min-w-[200px] text-center mt-10"
+                  >
+                    🡐 Back
+                  </button>
+                </>
+              ) : (
+                // Show Clue, Image, and Scan QR button
+                <>
+                  <h2 className="text-2xl bokor text-brown-primary mb-10 mt-10 px-10">
+                    {clue}
+                  </h2>
+                  <img src={Chest} className="w-[200px]" />
+                  <button
+                    onClick={() => setShowScanner(true)}
+                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
+                  >
+                    Scan QR
+                  </button>
+                </>
+              )}
             </div>
           )}
 
           {nextOperation === "completed" && (
             <div className="text-center text-xl archivo-light text-brown-primary h-full flex flex-col justify-center items-center">
-              <span className="text-[64px] mt-16 mb-10">🎉</span>
-              <p className="text-2xl archivo-bold">
-                Congrats!
-                <br />
-                You have completed the
-                <br />
-                Treasure Hunt!
+              {/* <span className="text-[64px] mt-16 mb-10">🎉</span> */}
+              <p className="text-4xl bokor">Aye Congrats!</p>
+              <p className="text-3xl bokor">
+                You have completed the Treasure Hunt!
               </p>
+              <img src={WinnerPirate} className="w-[280px]" />
+
               {place && (
                 <>
-                  <p className="text-[100px] archivo-bold mt-10 mb-10">
-                    {place}
-                  </p>
+                  <p className="text-[100px] bokor mt-10 mb-10">{place}</p>
                   <p>Place</p>
                 </>
               )}

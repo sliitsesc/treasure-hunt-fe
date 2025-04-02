@@ -29,7 +29,7 @@ const QRScanner = ({ handleQRSubmit }) => {
 
   return (
     <div className="flex flex-col justify-center items-center archivo-light text-brown-primary text-center">
-      <p className="mb-4 bokor text-2xl">
+      <p className="mb-4 mt-3 bokor text-3xl">
         Find the location and scan the <br />
         QR code to get the next clue 👀
       </p>
