@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 540px;
+  background-color: #f4e9d3;
+  background-image: url("assets/pirate-bg-transparent.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+}
+
+.bokor {
+  font-family: "Bokor", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
