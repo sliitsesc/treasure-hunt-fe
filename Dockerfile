@@ -3,20 +3,23 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.json* ./
 
 # Set env to skip native rollup bindings
 ENV ROLLUP_NO_NATIVE=true
 
-# Clean install dependencies
-RUN npm ci
+# Install dependencies using pnpm
+RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN pnpm run build
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
