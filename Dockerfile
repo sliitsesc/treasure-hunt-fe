@@ -6,14 +6,14 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files and install dependencies
-COPY package.json pnpm-lock.json* ./
+# Copy package files
+COPY package.json ./
 
 # Set env to skip native rollup bindings
 ENV ROLLUP_NO_NATIVE=true
 
-# Install dependencies using pnpm
-RUN pnpm install --frozen-lockfile
+# Install dependencies using pnpm (without frozen-lockfile since we don't have a pnpm lockfile)
+RUN pnpm install
 
 # Copy the rest of the application code
 COPY . .
