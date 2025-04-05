@@ -196,7 +196,6 @@ const GamePage = () => {
           )}
         </main>
       )}
-      <ScannerComponent clue={clue} handleQRSubmit={handleQRClueSubmit} />
     </>
   );
 };
