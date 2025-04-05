@@ -16,13 +16,12 @@ const QRScanner = ({ handleQRSubmit }) => {
 
   const handleScan = (result) => {
     console.log(result[0].rawValue); // Optional: Log the scanned result
-    handleQRSubmit(Number(result[0].rawValue)); // Call the parent component's function with the result as a number
+    handleQRSubmit(result[0].rawValue); // Call the parent component's function with the result as a number
   };
 
   return (
     <div className="flex flex-col justify-center items-center archivo-light text-brown-primary text-center">
-      {/* <h2 className="archivo-bold text-brown-primary text-2xl mb-6">{clue}</h2> */}
-      <p className="mb-8">
+      <p className="mb-4">
         Find the location and scan the <br />
         QR code to get the next clue 👀
       </p>
@@ -40,7 +39,6 @@ const QRScanner = ({ handleQRSubmit }) => {
         paused={false}
         onScan={handleScan} // Call the handleScan function when a QR code is scanned
         constraints={{ deviceId: deviceId }}
-        styles={{ borderRadius: "50px" }}
       />
     </div>
   );
