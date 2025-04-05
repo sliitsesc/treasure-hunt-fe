@@ -82,18 +82,18 @@ const GamePage = () => {
       .then((data) => {
         console.log("response: ", data);
 
-        if (data.state === true) {
-          if (data.completed === true) {
-            setNextOperation("completed");
-          } else if (data.operation === "question") {
-            setNextOperation(data.operation);
-            setQuestion(data.data);
-            setQuestionID(data.question_id);
-          }
-        } else {
-          setInvalidClue(true);
-          setNextOperation("wrongclue");
-        }
+        // if (data.state === true) {
+        //   if (data.completed === true) {
+        //     setNextOperation("completed");
+        //   } else if (data.operation === "question") {
+        //     setNextOperation(data.operation);
+        //     setQuestion(data.data);
+        //     setQuestionID(data.question_id);
+        //   }
+        // } else {
+        //   setInvalidClue(true);
+        //   setNextOperation("wrongclue");
+        // }
       })
       .catch((error) => {
         setIsError(true);
@@ -153,8 +153,7 @@ const GamePage = () => {
                   setInvalidClue(false);
                   setNextOperation("qr");
                 }}
-                className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
-              >
+                className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
                 Try again <RotateCcw size={24} className="inline-block ml-2" />
               </button>
             </div>
@@ -171,8 +170,7 @@ const GamePage = () => {
                   />
                   <button
                     onClick={() => setShowScanner(false)}
-                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl pl-6 pr-8 py-4 rounded-lg min-w-[200px] text-center mt-10"
-                  >
+                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl pl-6 pr-8 py-4 rounded-lg min-w-[200px] text-center mt-10">
                     🡐 Back
                   </button>
                 </>
@@ -185,8 +183,7 @@ const GamePage = () => {
                   <img src={Chest} className="w-[200px]" />
                   <button
                     onClick={() => setShowScanner(true)}
-                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
-                  >
+                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
                     Scan QR
                   </button>
                 </>
