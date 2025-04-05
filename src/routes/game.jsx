@@ -3,7 +3,7 @@ import Question from "../components/Question";
 import { API_URL } from "../constants";
 
 import { useUser } from "@clerk/clerk-react";
-import ScannerComponent from "../components/QRScanner";
+import QRScanner from "../components/QRScanner";
 import { RefreshCw, RotateCcw } from "lucide-react";
 
 const GamePage = () => {
@@ -63,7 +63,7 @@ const GamePage = () => {
   // handle submit QR clue
   // once the code is sent, it returns a question with question id
   function handleQRClueSubmit(code) {
-    fetch(`${API_URL}`, {
+    fetch(`${API_URL}/users/scan`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,18 +79,18 @@ const GamePage = () => {
       .then((data) => {
         console.log("response: ", data);
 
-        if (data.state === true) {
-          if (data.completed === true) {
-            setNextOperation("completed");
-          } else if (data.operation === "question") {
-            setNextOperation(data.operation);
-            setQuestion(data.data);
-            setQuestionID(data.question_id);
-          }
-        } else {
-          setInvalidClue(true);
-          setNextOperation("wrongclue");
-        }
+        // if (data.state === true) {
+        //   if (data.completed === true) {
+        //     setNextOperation("completed");
+        //   } else if (data.operation === "question") {
+        //     setNextOperation(data.operation);
+        //     setQuestion(data.data);
+        //     setQuestionID(data.question_id);
+        //   }
+        // } else {
+        //   setInvalidClue(true);
+        //   setNextOperation("wrongclue");
+        // }
       })
       .catch((error) => {
         setIsError(true);
@@ -170,10 +170,7 @@ const GamePage = () => {
               <h2 className="text-2xl archivo-bold text-brown-primary mb-10 mt-10 px-10">
                 {clue}
               </h2>
-              <ScannerComponent
-                clue={clue}
-                handleQRSubmit={handleQRClueSubmit}
-              />
+              <QRScanner clue={clue} handleQRSubmit={handleQRClueSubmit} />
             </div>
           )}
 
