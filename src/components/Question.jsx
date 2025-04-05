@@ -7,8 +7,7 @@ import {
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useState } from "react";
-
-import { API_URL } from "../constants";
+import apiClient from "../services/apiClient";
 
 const Question = ({
   questionID,
@@ -22,41 +21,30 @@ const Question = ({
   const [state, setState] = useState("unanswered"); // unanswered, correct, incorrect
 
   // handle answer submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setState("loading"); // Set state to loading while fetching
-    fetch(`${API_URL}`, {
-      method: "POST",
-      body: JSON.stringify({
-        operation: "question",
-        code: questionID,
-        answer: answer,
-        user_id: userEmail,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.state === true) {
-          if (data.completed) {
-            // If the game is completed, call the onGameComplete function
-            onGameComplete(data.data);
-          } else {
-            setState("correct");
-            setNextQuestionData({
-              data: data.data,
-              code: data.code,
-            });
-          }
+
+    try {
+      const data = await apiClient.submitAnswer(questionID, answer, userEmail);
+
+      if (data.state === true) {
+        if (data.completed) {
+          // If the game is completed, call the onGameComplete function
+          onGameComplete(data.data);
         } else {
-          setState("incorrect");
+          setState("correct");
+          setNextQuestionData({
+            data: data.data,
+            code: data.code,
+          });
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setState("error");
-      });
+      } else {
+        setState("incorrect");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setState("error");
+    }
   };
 
   // handle input change
@@ -93,8 +81,7 @@ const Question = ({
             />
             <button
               onClick={handleSubmit}
-              className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
-            >
+              className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
               Submit <ArrowRight size={24} className="inline-block ml-2" />
             </button>
           </div>
@@ -112,8 +99,7 @@ const Question = ({
           </div>
           <button
             onClick={handleNextQuestion} // Call handleNextQuestion to reset the component
-            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10"
-          >
+            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-full min-w-[200px] text-center mt-10">
             Next Question <ArrowRight size={24} className="inline-block ml-2" />
           </button>
         </div>
@@ -130,8 +116,7 @@ const Question = ({
           </div>
           <button
             onClick={() => setState("unanswered")} // Reset component when trying again
-            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10"
-          >
+            className="inline-flex justify-center items-center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
             Try again <RotateCcw size={24} className="inline-block ml-2" />
           </button>
         </div>
@@ -160,8 +145,7 @@ const Question = ({
           </div>
           <button
             onClick={handleNextQuestion} // Reset component on error retry
-            className="inline-flex justify-center items=center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w=[200px] text-center mt-10"
-          >
+            className="inline-flex justify-center items=center archivo-bold bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w=[200px] text-center mt-10">
             Try again <RotateCcw size={24} className="inline-block ml-2" />
           </button>
         </div>
@@ -175,7 +159,7 @@ Question.propTypes = {
   question: PropTypes.string.isRequired,
   nextQuestion: PropTypes.func.isRequired,
   setNextQuestionData: PropTypes.func.isRequired,
-  onGameComplete: PropTypes.func.isRequired, // Added prop for game completion callback
+  onGameComplete: PropTypes.func.isRequired,
   userEmail: PropTypes.string.isRequired,
 };
 

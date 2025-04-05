@@ -23,7 +23,7 @@ export default function RootLayout() {
       routerPush={(to) => navigate(to)}
       routerReplace={(to) => navigate(to, { replace: true })}
       publishableKey={PUBLISHABLE_KEY}
-    >
+      loadSession={true}>
       <header className="header bokor p-4 text-right flex justify-between items-center">
         <img src={TreasureHuntLogo} className="w-[160px]" />
         <div>

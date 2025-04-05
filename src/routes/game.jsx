@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Question from "../components/Question";
 import { API_URL } from "../constants";
+import apiClient from "../services/apiClient";
 
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import ScannerComponent from "../components/QRScanner";
 import { RefreshCw, RotateCcw, ArrowLeftSquare } from "lucide-react";
 import LostPirate from "../assets/lost_pirate.png";
@@ -10,105 +11,81 @@ import WinnerPirate from "../assets/winner.png";
 import Chest from "../assets/Chest2.png";
 
 const GamePage = () => {
-  const [nextOperation, setNextOperation] = useState("qr"); // 'waiting', 'scan', 'question', 'clue', 'error', "completed"
-  const [question, setQuestion] = useState("");
-  const [questionID, setQuestionID] = useState(null);
-  const [nextQuestionData, setNextQuestionData] = useState({
-    data: "",
-    code: "",
-    completed: false,
-  });
+  const [nextOperation, setNextOperation] = useState("qr"); // 'waiting', 'qr', 'clue', 'error', 'completed'
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [clue, setClue] = useState("");
   const [invalidClue, setInvalidClue] = useState(false);
   const [place, setPlace] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const [showScanner, setShowScanner] = useState(false);
-  // 1. initial fetch to get the first clue (QR code)
-  // useEffect(() => {
-  //   if (isLoaded) {
-  //     console.log(user.primaryEmailAddress.emailAddress);
-  //     setNextOperation("waiting");
-  //     fetch(`${API_URL}`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         operation: "init",
-  //         user_id: user.primaryEmailAddress.emailAddress,
-  //       }),
-  //     })
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         console.log("response: ", data);
-  //         if (data.completed === true) {
-  //           setNextOperation("completed");
-  //         } else if (
-  //           data.state === false &&
-  //           data.data === "All locations hav  e already been scanned." &&
-  //           data.operation === "error"
-  //         ) {
-  //           setNextOperation("completed");
-  //           console.log("completed");
-  //         } else if (data.operation === "qr" || data.operation === "question") {
-  //           setClue(data.data);
-  //           setNextOperation(data.operation);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         setIsError(true);
-  //         console.error("Error:", error);
-  //       });
-  //   }
-  // }, [isLoaded, user]); // Dependency array includes isLoaded and user to ensure correct behavior
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Fetch game details when component mounts
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetchGameDetails();
+    }
+  }, [isLoaded, user]);
+
+  async function fetchGameDetails() {
+    setIsLoading(true);
+
+    try {
+      const userId = user?.id;
+      const response = await apiClient.getDetails(userId);
+
+      const { currentStep, nextClue: responseClue } = response;
+      setCurrentStep(currentStep);
+      if (currentStep >= 6) {
+        setNextOperation("completed");
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        setNextOperation("qr");
+        setClue(responseClue);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setIsError(true);
+      console.error("Error fetching game details:", error);
+    }
+  }
 
   // handle submit QR clue
-  // once the code is sent, it returns a question with question id
-  function handleQRClueSubmit(code) {
-    console.log("Received qr code: ", code); // Debugging
+  async function handleQRClueSubmit(code) {
+    setIsLoading(true);
+    try {
+      const userId = user?.id;
+      const response = await apiClient.scanQRCode(code, userId);
 
-    fetch(`${API_URL}/users/scan`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        scannedQRId: code,
-        id: "EEjKkbTfW6pWc40AUlmZ",
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("response: ", data);
+      setIsLoading(false);
 
-        // if (data.state === true) {
-        //   if (data.completed === true) {
-        //     setNextOperation("completed");
-        //   } else if (data.operation === "question") {
-        //     setNextOperation(data.operation);
-        //     setQuestion(data.data);
-        //     setQuestionID(data.question_id);
-        //   }
-        // } else {
-        //   setInvalidClue(true);
-        //   setNextOperation("wrongclue");
-        // }
-      })
-      .catch((error) => {
+      // Check response message directly instead of looking for an error object
+      if (response.message === "QR code verified successfully") {
+        setNextOperation("success");
+        // await fetchGameDetails();
+      } else if (response.message === "Wrong Order") {
+        setInvalidClue(true);
+        setErrorMessage(
+          "You found a location that's part of your hunt, but you're not supposed to be here yet!"
+        );
+      } else if (response.message === "Location not relevant") {
+        setInvalidClue(true);
+        setErrorMessage("Wrong location matey! Try again.");
+      } else {
         setIsError(true);
-        console.error("Error:", error);
-      });
-  }
-
-  function handleNextQuestion() {
-    setNextOperation("qr");
-    // update clue state
-    setClue(nextQuestionData.data);
-  }
-
-  function setNextQuestion(data) {
-    setNextQuestionData(data);
+        setErrorMessage(
+          response.message || "Something went wrong with this clue."
+        );
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setIsError(true);
+      console.error("Error:", error);
+    }
   }
 
   function setGameComplete(data) {
@@ -118,23 +95,39 @@ const GamePage = () => {
 
   return (
     <>
+      {/* server errors */}
       {isError && (
         <div className="text-center text-4xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
           Error Connecting to Server
           <img src={LostPirate} className="w-[280px]" />
         </div>
       )}
-      {!isError && (
+      {/*  no server errors */}
+      {/* loading */}
+      {isLoading && (
+        <div className="text-center text-4xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
+          Waiting for server
+          <RefreshCw color="brown" size={60} className="animate-spin mt-10" />
+          {/* <img src={LostPirate} className="w-[280px]" /> */}
+        </div>
+      )}
+      {isLoaded && !isError && (
         <main className="h-full">
-          {nextOperation === "waiting" && (
-            <div className="text-center text-4xl bokor text-brown-primary h-full flex flex-col justify-center items-center">
-              Waiting for server
-              <RefreshCw
-                color="brown"
-                size={60}
-                className="animate-spin mt-10"
-              />
-              {/* <img src={LostPirate} className="w-[280px]" /> */}
+          {/* success */}
+          {nextOperation === "success" && (
+            <div className="text-center text-xl archivo-light text-brown-primary h-full flex flex-col justify-center items-center">
+              <p className="text-4xl bokor">Aye Congrats!</p>
+              <p className="text-3xl bokor">You found the clue!</p>
+              <img src={Chest} className="w-[280px]" />
+
+              <button
+                onClick={() => {
+                  setNextOperation("qr");
+                  fetchGameDetails();
+                }}
+                className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
+                Next Clue
+              </button>
             </div>
           )}
 
@@ -144,13 +137,14 @@ const GamePage = () => {
               <p className="text-3xl bokor">
                 Arrr!
                 <br />
-                That was the wrong clue mate!
+                {errorMessage || "That was the wrong clue mate!"}
               </p>
               <img src={LostPirate} className="w-[280px]" />
 
               <button
                 onClick={() => {
                   setInvalidClue(false);
+
                   setNextOperation("qr");
                 }}
                 className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
@@ -159,44 +153,36 @@ const GamePage = () => {
             </div>
           )}
 
+          {/* QR code */}
           {!invalidClue && nextOperation === "qr" && (
             <div className="flex flex-col items-center justify-center text-center">
-              {showScanner ? (
-                // Show ScannerComponent and Back button
-                <>
-                  <ScannerComponent
-                    clue={clue}
-                    handleQRSubmit={handleQRClueSubmit}
-                  />
-                  <button
-                    onClick={() => setShowScanner(false)}
-                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl pl-6 pr-8 py-4 rounded-lg min-w-[200px] text-center mt-10">
-                    🡐 Back
-                  </button>
-                </>
-              ) : (
-                // Show Clue, Image, and Scan QR button
-                <>
-                  <h2 className="text-2xl bokor text-brown-primary mb-10 mt-10 px-10">
-                    {clue}
-                  </h2>
-                  <img src={Chest} className="w-[200px]" />
-                  <button
-                    onClick={() => setShowScanner(true)}
-                    className="inline-flex justify-center items-center bokor bg-brown-primary text-white text-2xl px-6 py-4 rounded-lg min-w-[200px] text-center mt-10">
-                    Scan QR
-                  </button>
-                </>
-              )}
+              <p className="text-2xl bokor mt-4 px-10 text-brown-primary">
+                Your Clue:
+              </p>
+              <p className="text-3xl bokor mb-6 mt-0 px-10 text-brown-primary">
+                {clue}
+              </p>
+              <ScannerComponent
+                clue={clue}
+                handleQRSubmit={handleQRClueSubmit}
+              />
             </div>
           )}
 
+          {/* correct clue */}
+
+          {/* completed state */}
           {nextOperation === "completed" && (
             <div className="text-center text-xl archivo-light text-brown-primary h-full flex flex-col justify-center items-center">
               {/* <span className="text-[64px] mt-16 mb-10">🎉</span> */}
               <p className="text-4xl bokor">Aye Congrats!</p>
               <p className="text-3xl bokor">
                 You have completed the Treasure Hunt!
+              </p>
+              <p className="text-3xl bokor">
+                {" "}
+                <br />
+                Come to the SESC stall at SLIIT Islands to claim your prize!
               </p>
               <img src={WinnerPirate} className="w-[280px]" />
 
@@ -210,9 +196,24 @@ const GamePage = () => {
           )}
         </main>
       )}
-      {/* <ScannerComponent clue={clue} handleQRSubmit={handleQRClueSubmit} /> */}
     </>
   );
 };
 
 export default GamePage;
+
+{
+  // {
+  //   !invalidClue && nextOperation === "qr" && (
+  //     <div className="flex flex-col items-center justify-center text-center">
+  //       <p className="text-2xl bokor mt-4 px-10 text-brown-primary">
+  //         Your Clue:
+  //       </p>
+  //       <p className="text-3xl bokor mb-6 mt-0 px-10 text-brown-primary">
+  //         {clue}
+  //       </p>
+  //       <ScannerComponent clue={clue} handleQRSubmit={handleQRClueSubmit} />
+  //     </div>
+  //   );
+  // }
+}
