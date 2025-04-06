@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Question from "../components/Question";
 import { API_URL } from "../constants";
 import apiClient from "../services/apiClient";
-const STEPS = 10;
+const STEPS = 11;
 
 import { useUser, useAuth } from "@clerk/clerk-react";
 import ScannerComponent from "../components/QRScanner";
