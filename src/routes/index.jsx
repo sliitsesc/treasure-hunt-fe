@@ -21,11 +21,18 @@ export default function IndexPage() {
         </Link>
       </SignedIn>
       <SignedOut>
-        <Link
-          to="/sign-in"
-          className="bokor bg-brown-primary text-white text-2xl px-6 py-4 rounded-full min-w-[200px] text-center">
-          Sign In / Register
-        </Link>
+        <div className="flex flex-col items-center gap-y-4">
+          <Link
+            to="https://accounts.treasurehunt.matterofcode.dev/sign-up"
+            className="bokor bg-brown-primary text-white text-3xl px-6 py-4 rounded-full min-w-[200px] text-center">
+            Register
+          </Link>
+          <Link
+            to="/sign-in"
+            className="bokor bg-brown-primary text-white text-3xl px-6 py-4 rounded-full min-w-[200px] text-center">
+            Log In
+          </Link>
+        </div>
       </SignedOut>
     </div>
   );
