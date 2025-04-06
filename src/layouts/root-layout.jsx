@@ -25,7 +25,9 @@ export default function RootLayout() {
       publishableKey={PUBLISHABLE_KEY}
       loadSession={true}>
       <header className="header bokor p-4 text-right flex justify-between items-center">
-        <img src={TreasureHuntLogo} className="w-[160px]" />
+        <a href="/game">
+          <img src={TreasureHuntLogo} className="w-[160px]" />
+        </a>
         <div>
           <SignedIn>
             <UserButton />
@@ -35,7 +37,7 @@ export default function RootLayout() {
           </SignedOut> */}
         </div>
       </header>
-      <main className="px-4 pb-4">
+      <main className="px-4 pb-4 overflow-x-hidden relative">
         <Outlet />
         <HelpBar />
       </main>

@@ -68,6 +68,15 @@ class ApiClient {
       }),
     });
   }
+
+  /**
+   * Get leaderboard data
+   */
+  async getLeaderboard() {
+    return this.request("/score", {
+      method: "GET",
+    });
+  }
 }
 
 export default new ApiClient();
