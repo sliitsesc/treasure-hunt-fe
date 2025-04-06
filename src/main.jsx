@@ -9,6 +9,7 @@ import IndexPage from "./routes";
 import SignInPage from "./routes/sign-in";
 import GameLayout from "./layouts/game-layout";
 import GamePage from "./routes/game";
+import LeaderboardPage from "./routes/leaderboard";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,11 @@ const router = createBrowserRouter([
         element: <GameLayout />,
         path: "game",
         children: [{ path: "/game", element: <GamePage /> }],
+      },
+      {
+        element: <GameLayout />,
+        path: "leaderboard",
+        children: [{ path: "/leaderboard", element: <LeaderboardPage /> }],
       },
     ],
   },
